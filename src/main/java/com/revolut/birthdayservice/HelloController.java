@@ -1,6 +1,10 @@
 package com.revolut.birthdayservice;
 
+import com.revolut.birthdayservice.exception.DateOfBirthInFutureException;
 import com.revolut.birthdayservice.exception.ResourceNotFoundException;
+
+import java.time.format.DateTimeParseException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,14 +23,20 @@ public class HelloController {
     /**
      * Saves/updates the given user’s name and date of birth in the database.
      * @param username must contain only letters
-     * @param helloPut dateOfBirth must be a date before the today date.
+     * @param helloPut dateOfBirth format "YYYY-MM-DD" and must be a date before the today date.
      * @return
+     * @throws DateTimeParseException
+     * @throws DateOfBirthInFutureException
      */
     @PutMapping("/hello/{username}")
-    public ResponseEntity<Void> hello(@PathVariable String username, @RequestBody HelloPut helloPut) {
-        // TODO: handle 'update'
-        // TODO: handle regex and the now datetime validation
-        User user = new User(username, helloPut.getDateOfBirth());
+    public ResponseEntity<String> hello(@PathVariable String username, @RequestBody HelloPut helloPut) throws DateTimeParseException, DateOfBirthInFutureException {
+        User user;
+        try {
+            user = userRepository.findByUsername(username)
+                .orElse(new User(username, helloPut.getDateOfBirthAsLocalDate()));
+        } catch(DateTimeParseException | DateOfBirthInFutureException exception) {
+            return ResponseEntity.badRequest().body(exception.getMessage());
+        }
         userRepository.save(user);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -34,14 +44,13 @@ public class HelloController {
     /**
      * Returns hello birthday message for the given user
      * @param username must contain only letters
-     * @return
+     * @return Http response, with birthday greeting message if successful
      */
     @GetMapping("/hello/{username}")
     public ResponseEntity<HelloGet> hello(@PathVariable String username) {
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new ResourceNotFoundException("User does not exist with username: " + username));
-        // TODO: handle variation of messaging based on current datetime
-        HelloGet helloGet = new HelloGet(String.format("Hello, %s %s!", user.getUsername(), user.getDateOfBirth()));
+        HelloGet helloGet = new HelloGet(user.getBirthdayGreeting());
         return ResponseEntity.ok(helloGet);
     }
 
