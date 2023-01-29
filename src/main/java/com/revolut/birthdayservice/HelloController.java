@@ -3,6 +3,7 @@ package com.revolut.birthdayservice;
 import com.revolut.birthdayservice.exception.DateOfBirthInFutureException;
 import com.revolut.birthdayservice.exception.ResourceNotFoundException;
 
+import java.time.Instant;
 import java.time.format.DateTimeParseException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,7 @@ public class HelloController {
         try {
             user = userRepository.findByUsername(username)
                 .orElse(new User(username, helloPut.getDateOfBirthAsLocalDate()));
+            user.setUpdatedTimestamp(Instant.now());
         } catch(DateTimeParseException | DateOfBirthInFutureException exception) {
             return ResponseEntity.badRequest().body(exception.getMessage());
         }

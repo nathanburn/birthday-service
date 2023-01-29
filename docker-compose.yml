@@ -1,0 +1,23 @@
+version: '3.4'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: app
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/birthday-service
+      - SPRING_DATASOURCE_USERNAME=birthday-service-user
+      - SPRING_DATASOURCE_PASSWORD=birthday-service-password
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    ports:
+      - 8080:8080
+  db:
+    image: 'postgres:13.1-alpine'
+    container_name: db
+    environment:
+      - POSTGRES_DB=birthday-service
+      - POSTGRES_USER=birthday-service-user
+      - POSTGRES_PASSWORD=birthday-service-password

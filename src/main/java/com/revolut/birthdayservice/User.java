@@ -115,6 +115,10 @@ public class User {
         return DateTimeFormatter.ofLocalizedDateTime( FormatStyle.MEDIUM ).withZone(ZoneId.from(ZoneOffset.UTC)).format(updatedTimestamp);
     }
 
+    public void setUpdatedTimestamp(Instant updatedTimestamp) {
+        this.updatedTimestamp = updatedTimestamp;
+    }
+
     /**
      * Get a username greeting e.g. "Hello, <username>!"
      * @return A greeting

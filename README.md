@@ -13,6 +13,43 @@
 
 ## Build
 
+### Run with Docker Compose
+
+Pre-requisties:
+
+- Installed Docker (and Docker Compose is enabled)
+
+Steps:
+
+1. Run App and Postgres Database with Docker Compose:
+
+    ```bash
+    docker compose up --force-recreate --build -d
+    ```
+
+2. Navigate to `http://localhost:8080` in your browser.
+
+3. Check running containers and logs with Docker Compose:
+
+    ```bash
+    docker compose ps
+    docker compose logs
+    ```
+
+4. Tear down with Docker Compose:
+
+    ```bash
+    docker compose down
+    ```
+
+#### Get export from Postgres Database in container
+
+Execute to capture mysqldump of the `dev` database:
+
+```bash
+docker exec -i db pg_dump -U birthday-service-user -h db -p 5432 birthday-service >> /Users/nathanbu/Documents/dumpFile.sql
+```
+
 ### Build and Run Locally
 
 Pre-requisties:
