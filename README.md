@@ -187,7 +187,7 @@ We will use the `Test Pyramid` to guide a depth in test coverage, from unit test
 
 ### Continuous Deployment
 
-![Continuous Deployment](docs/imgs/continuous-deployment.png "Continuous Deployment"
+![Continuous Deployment](docs/imgs/continuous-deployment.png "Continuous Deployment")
 
 Deployment can be triggered a based on the presence of a release bundle / artifact for our configured service – using a tool like `Jenkins` (or `CircleCI`) again using pipeline-as-code to manage a set of standard build stages and gates, from:
 
