@@ -3,13 +3,12 @@
 ## Table Of Contents
 
 - [Plan](#plan)
-- [Code](#code)
 - [Build](#build)
 - [Test](#test)
-- [Release](#release)
 - [Deploy](#deploy)
 - [Operate](#operate)
 - [Monitor](#monitor)
+- [Discover](#discover)
 
 ## Plan
 
@@ -71,7 +70,7 @@ Based on the infrastructure choices detailed above, below is a system diagram re
 - `Data Caching` - to speed up data retrieval we could configure a `Redis Cache` to work in conjunction with our database.
 - `Message Queues` - to support better scalability e.g. `Apache Kafka`, `AWS SQS` (Simple Queue Service) or `RabbitMQ` could be used to have `PUT` requests raised as an event. This would require an update to the "birthday-service" implementation (to "publisher / subscriber messaging") but would allow for better management of high volume updates to the data whilst guaranteeing execution order.
 
-## Code
+## Build
 
 The "birthday-service" will be built using DDD (Domain Driven Design) a service dedicated purely to creating users - based on a unique username and date-of-birth, returning a birthday message or count-down based on the current local date time.
 
@@ -80,8 +79,6 @@ The "birthday-service" will be built using DDD (Domain Driven Design) a service 
 The code for a Microservice could be written in most languages (e.g. Java, Go, C#, Python, TypeScript, Ruby, Groovy etc.), the decision will be based on the DevX (of the language, framework, ease-of-use, boilerplate options and tools), performance, and the engineering teams skill-set / experience.
 
 `Java` (Java 17) using the `Spring Boot` open source framework (for building Java applications in the Java Virtual Machine (JVM) ecosystem), is the recommended choice. The Spring framework with Spring Boot simplifies application development and deployment through auto-configuration and convention over configuration.
-
-## Build
 
 ### Run with Docker Compose
 
@@ -152,3 +149,79 @@ Prerequisites:
     ```
 
 3. Navigate to `http://localhost:8080` in your browser.
+
+### Continuous Integration
+
+![Continuous Integration](docs/imgs/continuous-integration.png "Continuous Integration")
+
+Using pipelines-as-code with `GitHub Actions` (or `Jenkins`), we can help to manage a set of standard build stages and gates, from:
+
+- compiling the code and providing a unique semantic version (based on the current service version, branch and build number),
+- automated gating on unit test execution, and static code analysis (for highlighting code and style smells, to bugs and code coverage checks),
+- linting, building and publishing Docker images, Terraform modules and Helm charts – which are pushed into an artifact store and scanned and gated upon for vulnerabilities (e.g. `Snyk` or `JFrog Xray`)
+- with a final build pipeline gate on functional validation of the more comprehensive test suites (including integration, contract, UI, penetration and performance testing) helping to ensure these test suites don’t go stale and are extended for new functionality
+- then on a successful completion of all these stages – a release bundle for the semantic version is created and distributed to an artifact store (e.g. `ECR` or `JFrog Artifactory`)
+
+With all these stages reporting back to an internal instance of `Grafeas` capturing the key meta data of build and test attestations.
+
+### Build Script
+
+TODO
+
+## Test
+
+### TDD (Test Driven Development)
+
+Unit tests have been created as part of a TDD methodology, supporting understanding and expected validation of existing and future functionality.
+These tests are executed as part of the build process, and passing these tests and their code coverage percentage for new functionality code should be used in automatically gating feature branch pull-requests / merges to the mainline branch.
+
+### Continuous Testing
+
+Our build and deployment pipelines promote and enable automated quality assurance - "Build, test, provide infrastructure, deploy and test more!"
+
+![Test Pyramid](docs/imgs/test-pyramid.png "Test Pyramid")
+
+We will use the `Test Pyramid` to guide a depth in test coverage, from unit tests, to integration tests, contract tests, up to system UI tests - powered by industry standard frameworks like `PACT`, `K6`, `Taurus` (JMeter), `Selenium` and the `Robot Framework`.
+
+## Deploy
+
+### Continuous Deployment
+
+![Continuous Deployment](docs/imgs/continuous-deployment.png "Continuous Deployment"
+
+Deployment can be triggered a based on the presence of a release bundle / artifact for our configured service – using a tool like `Jenkins` (or `CircleCI`) again using pipeline-as-code to manage a set of standard build stages and gates, from:
+
+- initially validating the release bundle / artifacts – that they have come from the expected source (our artifact store) and have the required or expected build and test attestation records in our `Grafeas` instance
+- Docker images are pushed from an internal artifact store to our public ACRs which our clusters have access to pull from,
+the Terraform plans are applied for the current environment (e.g. `green`) and each region – for updating our Database (or Cache) configuration per region
+- then we upgrade the service with our latest Helm charts – updating the per environment and multi-region deployments - following a `Rolling Update` strategy - allowing an update to take place with zero downtime by incrementally updating Pods instances with new ones
+- as a final stage and gate we run our comprehensive versioned test suite via helm test incl. integration, performance, penetration and UI tests
+- in the event of deployment or test failures - we can alert the engineering team (e.g. via `Slack` notification) to investigate on the `green` environment
+- if all stages are successful however, we can automatically (or via a manual-judgement) update the application load balancer to switch traffic from the `blue` to `green` cluster.
+
+Again all these stages are reporting back to an internal instance of `Grafeas` capturing the key meta data of deployment and test attestations.
+
+### Deployment Script
+
+TODO
+
+## Operate
+
+The infrastructure will need management for security and patch updates (managed via GitOps), network and scaling configuration plans (managed via GitOps), and reviewing of costs including for underutilized cloud resources.
+
+## Monitor
+
+Observability in every layer is vital to understand performance, this includes using industry standard tooling like:
+
+- `CloudWatch` and `DataDog` for monitoring and alerting on infrastructure events and metrics,
+- `Splunk` and `New Relic` for logging, monitoring, tracing and alerting of our hosted services,
+- `Grafeas` for monitoring and tracing our own build and release tooling – enabling `DORA` (DevOps Research and Assessment) metrics reporting - including:
+
+  - tracking deployment frequency,
+  - lead time on changes,
+  - recovery times,
+  - and failure rates
+
+## Discover
+
+Through the monitoring of our infrastructure and application we can learn how to improve it for better performance, reliability, redundancy and scalability - build these discoveries into future plans (work items), completing the DevOps infinity loop!
