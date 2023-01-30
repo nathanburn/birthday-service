@@ -166,7 +166,9 @@ With all these stages reporting back to an internal instance of `Grafeas` captur
 
 ### Build Script
 
-TODO
+```bash
+bash build.sh "birthday-service" "main"
+```
 
 ## Test
 
@@ -203,7 +205,9 @@ Again all these stages are reporting back to an internal instance of `Grafeas` c
 
 ### Deployment Script
 
-TODO
+```bash
+bash deploy.sh "birthday-service" "green"
+```
 
 ## Operate
 
