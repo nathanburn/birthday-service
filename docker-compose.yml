@@ -21,3 +21,6 @@ services:
       - POSTGRES_DB=birthday-service
       - POSTGRES_USER=birthday-service-user
       - POSTGRES_PASSWORD=birthday-service-password
+    # start the service with an initial example data set
+    volumes:
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql

@@ -56,7 +56,7 @@ Based on the infrastructure choices detailed above, below is a system diagram re
 #### Notes
 
 - `GitOps` - all the AWS infrastructure is managed via IaC (Infrastructure as Code), using standard AWS `Terraform` modules, to create plans with input and output configs - validated on each feature branch and then applied on merging to a mainline branch via a build tool (e.g. Jenkins)
-- `Blue / Green` deployment strategy - two separate but identical environments for our deployed "birthday-service". One environment (blue) is running the current application version and one environment (green) is running the new application version. Increases application availability and reduces deployment risk by simplifying the rollback process if a deployment fails. Once testing has been completed on the green environment, live application traffic is directed to the green environment and the blue environment is deprecated.
+- `Blue / Green` deployment strategy - two separate but identical environments (or namespaces) for our deployed "birthday-service". One environment (blue) is running the current application version and one environment (green) is running the new application version. Increases application availability and reduces deployment risk by simplifying the rollback process if a deployment fails. Once testing has been completed on the green environment, live application traffic is directed to the green environment and the blue environment is deprecated.
 - `Route 53` to maintain DNS records for the "birthday-service".
 - `Web Application Firewall` - protect against common web exploits and bots that can affect availability, compromise security, or consume excessive resources.
 - `Application Load Balancer` - automatically distributes incoming traffic across multiple targets, our blue / green environments and multiple Availability Zones.
@@ -166,6 +166,17 @@ With all these stages reporting back to an internal instance of `Grafeas` captur
 
 ### Build Script
 
+Installed prerequisites:
+
+- AWS CLI
+- Git
+- Java 17 JDK
+- Maven
+- Docker (and Docker Compose is enabled)
+- Helm
+- Terraform
+- Taurus (bzt)
+
 ```bash
 bash build.sh "birthday-service" "main"
 ```
@@ -195,18 +206,22 @@ Deployment can be triggered a based on the presence of a release bundle / artifa
 
 - initially validating the release bundle / artifacts – that they have come from the expected source (our artifact store) and have the required or expected build and test attestation records in our `Grafeas` instance
 - Docker images are pushed from an internal artifact store to our public ACRs which our clusters have access to pull from,
-the Terraform plans are applied for the current environment (e.g. `green`) and each region – for updating our Database (or Cache) configuration per region
+- the Terraform plans are applied for updating the Amazon RDS (and other service specific cloud resources)
 - then we upgrade the service with our latest Helm charts – updating the per environment and multi-region deployments - following a `Rolling Update` strategy - allowing an update to take place with zero downtime by incrementally updating Pods instances with new ones
 - as a final stage and gate we run our comprehensive versioned test suite via helm test incl. integration, performance, penetration and UI tests
 - in the event of deployment or test failures - we can alert the engineering team (e.g. via `Slack` notification) to investigate on the `green` environment
-- if all stages are successful however, we can automatically (or via a manual-judgement) update the application load balancer to switch traffic from the `blue` to `green` cluster.
+- if all stages are successful however, we can automatically (or via a manual-judgement) update the application load balancer to switch traffic from the `blue` to `green` cluster (or namespace).
 
 Again all these stages are reporting back to an internal instance of `Grafeas` capturing the key meta data of deployment and test attestations.
 
 ### Deployment Script
 
+- AWS CLI
+- Helm
+- Terraform
+
 ```bash
-bash deploy.sh "birthday-service" "green"
+bash deploy.sh "birthday-service" "0.1.0" "green"
 ```
 
 ## Operate
