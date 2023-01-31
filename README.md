@@ -16,22 +16,21 @@ The plan will act as an ADR (Architectural Decision Record) for the "birthday-se
 
 ### Source Control
 
-- Source control via a `DVCS` (Distributed Version Control Systems) e.g. Git.
-`Git` is now the default and industry recommended source control option, due to it providing multiple DevX (Developer Experience) benefits including; working offline, no single point of failure (distributed copies), and faster local operations.
+- Source control via a `DVCS` (Distributed Version Control Systems). `Git` is now the default and industry recommended source control option, due to it providing multiple DevX (Developer Experience) benefits including; working offline, no single point of failure (distributed copies), and faster local operations.
 
 - Git Collaboration Pattern, based on the "birthday-service" being a cloud-deployed application where we want to take advantage of continuously deploying a latest mainline release `GitHub Flow` is the recommended approach - developers work on short-lived feature branches which are integrated into mainline post successful tests and code review.
 To aid with triage between versions, we will automate the tagging of the mainline branch on publishing of a release with the current semantic version.
 
 ### Data Store
 
-The "birthday-service" will need to store each uesr's unique `username` and `date-of-birth` allowing for extensibility to store more attributes in future. The recommendation would be to use a relational SQL database to store a collections of `Users` - the options include `MySQL` or `PostgreSQL` - both are very popular open-source database options - the recommendation is to use `PostgreSQL` due to its; **performance and scalability** (geo spatial support and unrestricted concurrency — and deep, extensive data analysis across multiple data types), **concurrency** (multiversion concurrency control - MVCC, which enables the simultaneous occurrence of write operations and reads),**compatibility** (support for multiple programming languages, including Python, Java, JavaScript, C/C++ and Ruby), **business continuity** (high availability of services through asynchronous or synchronous replication methods across servers), and **cost-effective and flexible** (open-source database management innovation and technology - including support for JSON data types and jOOQ - Java Object Orientated Query).
+The "birthday-service" will need to store each uesr's unique `username` and `date-of-birth` allowing for extensibility to store more attributes in future. The recommendation would be to use a relational SQL database to store a collections of `Users` - the options include `MySQL` or `PostgreSQL` - both are very popular open-source database options - the recommendation is to use `PostgreSQL` due to its; **performance and scalability** (geo spatial support and unrestricted concurrency — and deep, extensive data analysis across multiple data types), **concurrency** (multiversion concurrency control - MVCC, which enables the simultaneous occurrence of write operations and reads), **compatibility** (support for multiple programming languages, including Python, Java, JavaScript, C/C++ and Ruby), **business continuity** (high availability of services through asynchronous or synchronous replication methods across servers), and **cost-effective and flexible** (open-source database management innovation and technology - including support for JSON data types and jOOQ - Java Object Orientated Query).
 
 ### Infrastructure
 
 The "birthday-service" application and data store will both need hosting to be accessible for use by customers.
 For the best performance, scalability and reliability we should look to the major cloud providers (e.g. AWS, Azure and GCP), whilst continually reviewing the cost, required flexibility / configuration, and required redundancy.
 
-`AWS` is the recommended infrastructure provider, supporting multiple service offerings, having the largest user base (of the three major cloud providers) and the engineering teams skill-set / experience.
+`AWS` is the recommended infrastructure provider based on; supporting multiple service offerings, having the largest user base (of the three major cloud providers) and the engineering team's skill-set / experience.
 
 #### Compute
 
@@ -41,7 +40,7 @@ AWS (and other major cloud providers) offer great flexibility and options when i
 - `PaaS` (Platform as a Service) `EKS with Fargate` or `ECS with Fargate` (Elastic Container Service) provides a more managed approach where set-up and management of the hosting infrastructure is done by Fargate i.e. `Serverless` - requires reduced operational support, automated security updates, lower-level issue triage can be trickier (without access to kubectl on ECS), can be more cost-effective with the right configuration (i.e. accurate scaling configuration based on expected usage thresholds).
 - `FaaS` (Function as a Service) `Lambda` also provides a `Serverless` option with no operational support, automated scaling, issue triage can be trickier (restricted access to infrastructure), can be more cost-effective with the right configuration (i.e. using `GraalVM` to create smaller and more performant binaries).
 
-Based on the above to allow for flexibility on extending the "birthday-service" in the future, and allow for the creation of other DDD containerized services to be hosted in a shared resource - the recommendation is to use `EKS with Fargate` bringing the benefits of reduced operations and const control on our Kubernetes cluster, and providing the engineering team with access to more detailed configuration options in regards to scale and redundancy.
+Based on the above to allow for flexibility on extending the "birthday-service" in the future, and allow for the creation of other DDD containerized services to be hosted in a shared resource - the recommendation is to use `EKS with Fargate` bringing the benefits of reduced operations and cost control on our Kubernetes cluster, and providing the engineering team with access to more detailed configuration options in regards to scale and redundancy.
 
 #### Database
 
@@ -76,9 +75,9 @@ The "birthday-service" will be built using DDD (Domain Driven Design) a service 
 
 ### Language
 
-The code for a Microservice could be written in most languages (e.g. Java, Go, C#, Python, TypeScript, Ruby, Groovy etc.), the decision will be based on the DevX (of the language, framework, ease-of-use, boilerplate options and tools), performance, and the engineering teams skill-set / experience.
+The code for a Microservice could be written in most languages (e.g. Java, Go, C#, Python, TypeScript, Ruby, Groovy etc.), the decision will be based on the DevX (of the language, framework, ease-of-use, boilerplate options and tools), performance, and the engineering team's skill-set / experience.
 
-`Java` (Java 17) using the `Spring Boot` open source framework (for building Java applications in the Java Virtual Machine (JVM) ecosystem), is the recommended choice. The Spring framework with Spring Boot simplifies application development and deployment through auto-configuration and convention over configuration.
+`Java` (Java 17) using the `Spring Boot` open source framework (for building Java applications in the Java Virtual Machine (JVM) ecosystem), is the recommended choice. The Spring framework with Spring Boot simplifies application development and deployment through auto-configuration, reducing time spent on application development and deployment.
 
 ### Run with Docker Compose
 
@@ -94,14 +93,14 @@ Steps:
     docker compose up --force-recreate --build -d
     ```
 
-2. Navigate to `http://localhost:8080` in your browser.
-
-3. Check running containers and logs with Docker Compose:
+2. Check running containers and logs with Docker Compose:
 
     ```bash
     docker compose ps
     docker compose logs
     ```
+
+3. Navigate to `http://localhost:8080` in your browser.
 
 4. Tear down with Docker Compose:
 
@@ -145,7 +144,7 @@ Prerequisites:
 2. Run with `jar` file:
 
     ```bash
-    java -jar target/birthday-service-0.0.1-SNAPSHOT.jar
+    java -jar target/birthday-service-0.1.0.jar
     ```
 
 3. Navigate to `http://localhost:8080` in your browser.
@@ -186,7 +185,7 @@ bash build.sh "birthday-service" "main"
 ### TDD (Test Driven Development)
 
 Unit tests have been created as part of a TDD methodology, supporting understanding and expected validation of existing and future functionality.
-These tests are executed as part of the build process, and passing these tests and their code coverage percentage for new functionality code should be used in automatically gating feature branch pull-requests / merges to the mainline branch.
+These tests are executed as part of the build process, and passing these tests and their code coverage percentage for new functionality code - should be used in automatically gating feature branch pull-requests / merges to the mainline branch.
 
 ### Continuous Testing
 
@@ -243,4 +242,4 @@ Observability in every layer is vital to understand performance, this includes u
 
 ## Discover
 
-Through the monitoring of our infrastructure and application we can learn how to improve it for better performance, reliability, redundancy and scalability - build these discoveries into future plans (work items), completing the DevOps infinity loop!
+Through the monitoring of our infrastructure and application we can learn how to improve it for better performance, reliability, redundancy, scalability and cost efficiency - and build these discoveries into future plans (work items), fulfilling the DevOps infinity loop!
