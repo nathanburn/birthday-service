@@ -28,20 +28,20 @@ mvn test
 
 # Stage 5
 echo "Static Code Analysis"
-echo "mvn clean install -P check" # (https://github.com/openhab/static-code-analysis/blob/main/docs/maven-plugin.md)
+echo "JaCoCo (Java Code Coverage) results: 'target/site/jacoco/index.html'"
 echo "Push coverage results to SonarQube (or a similar static code analysis tool)"
 
 # Stage 6
 echo "Artifact (Docker, Terraform, Helm) - Lint, Build, Validate and Publish"
 
-# Docker
+# Stage 6.1 - Docker
 docker build -t "$serviceName" .
 docker images --filter "reference=$serviceName"
 echo "aws ecr get-login-password --region [REGION] | docker login --username [USERNAME] --password-stdin [AWS_ACCOUNT_ID].dkr.ecr.region.amazonaws.com"
 echo "docker tag $serviceName:$semVer [AWS_ACCOUNT_ID].dkr.ecr.region.amazonaws.com/$serviceName-repository"
 echo "docker push [AWS_ACCOUNT_ID].dkr.ecr.region.amazonaws.com/$serviceName-repository"
 
-# Terraform
+# Stage 6.2 - Terraform
 terraform version
 terraform -chdir="deploy/resources" init
 terraform -chdir="deploy/resources" validate
@@ -49,7 +49,7 @@ echo "terraform -chdir="deploy/resources" plan"
 echo "tar czf $serviceName-terraform.tar.gz deploy/resources"
 echo "oras push -u AWS -p $(aws ecr get-login-password) [AWS_ACCOUNT_ID].dkr.ecr.region.amazonaws.com:opa-temporal-0 --manifest-config empty-config.json:application/vnd.cncf.openpolicyagent.config.v1+json bundle.tar.gz:application/vnd.cncf.openpolicyagent.manifest.layer.v1+json"
 
-# Helm
+# Stage 6.3 - Helm
 helm version
 helm lint "./deploy/charts/$serviceName"
 helm package "./deploy/charts/$serviceName" --version $semVer
