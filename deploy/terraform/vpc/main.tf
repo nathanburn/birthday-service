@@ -18,6 +18,7 @@ resource "aws_internet_gateway" "main" {
   }
 }
 
+# NAT Gateways charge per hour
 resource "aws_nat_gateway" "main" {
   count         = length(var.private_subnets)
   allocation_id = element(aws_eip.nat.*.id, count.index)
@@ -80,6 +81,7 @@ resource "aws_route" "public" {
   gateway_id             = aws_internet_gateway.main.id
 }
 
+# required with a NAT Gateway (which costs by the hour)
 resource "aws_route_table" "private" {
   count  = length(var.private_subnets)
   vpc_id = aws_vpc.main.id

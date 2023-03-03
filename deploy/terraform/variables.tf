@@ -23,6 +23,12 @@ variable "backend_dynamodb_table_name" {
   default     = "birthday-service_terraform_state"
 }
 
+variable "usernames" {
+  description = "the usernames to create IAM users for with read only access"
+  type        = list(string)
+  default     = ["sean", "carlos"]
+}
+
 variable "availability_zones" {
   description = "a comma-separated list of availability zones, defaults to all AZ of the region, if set to something other than the defaults, both private_subnets and public_subnets have to be defined as well"
   default     = ["eu-west-2a"] #["eu-west-2a", "eu-west-2b", "eu-west-2c"]

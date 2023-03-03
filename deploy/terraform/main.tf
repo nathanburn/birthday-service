@@ -23,6 +23,11 @@ module "dynamodb" {
   name   = var.backend_dynamodb_table_name
 }
 
+module "iam" {
+  source    = "./iam"
+  usernames = var.usernames
+}
+
 module "vpc" {
   source             = "./vpc"
   name               = var.name
