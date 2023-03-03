@@ -13,7 +13,7 @@ services:
       - SPRING_DATASOURCE_PASSWORD=birthday-service-password
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     ports:
-      - 8080:8080
+      - 8080:8000
   db:
     image: 'postgres:13.1-alpine'
     container_name: db
