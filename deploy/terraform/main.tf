@@ -3,13 +3,14 @@ provider "aws" {
   region = var.region
 }
 
+# instate a cloud 'backend' post initial 'apply'
 terraform {
   backend "s3" {
     # note: variable not allowed
-    bucket         = "nab-aws-001-birthday-service-terraform-backend"
+    bucket         = "nab-aws-001-us-birthday-service-terraform-backend"
     key            = "terraform.tfstate"
-    region         = "eu-west-2"
-    dynamodb_table = "birthday-service_terraform_state"
+    region         = "us-east-2"
+    dynamodb_table = "birthday-service_us_terraform_state"
   }
 }
 
@@ -52,9 +53,11 @@ module "alb" {
   vpc_id              = module.vpc.id
   subnets             = module.vpc.public_subnets
   environment         = var.environment
+  region              = var.region
   alb_security_groups = [module.security_groups.alb]
-  #alb_tls_cert_arn    = var.tsl_certificate_arn
-  health_check_path = var.health_check_path
+  health_check_path   = var.health_check_path
+  alerts_email        = var.alerts_email
+  #alb_tls_cert_arn   = var.tsl_certificate_arn
 }
 
 module "ecr" {
@@ -91,6 +94,7 @@ module "ecs" {
   container_secrets      = module.secrets.secrets_map
   container_image        = module.ecr.aws_ecr_repository_url
   container_secrets_arns = module.secrets.application_secrets_arn
+  alerts_email           = var.alerts_email
 }
 
 module "rds" {

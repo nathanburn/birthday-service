@@ -6,6 +6,10 @@ variable "environment" {
   description = "the name of the environment, e.g. \"test\", \"stage\" \"prodution\""
 }
 
+variable "region" {
+  description = "the AWS region in which resources are created"
+}
+
 variable "subnets" {
   description = "Comma separated list of subnet IDs"
 }
@@ -24,4 +28,8 @@ variable "alb_security_groups" {
 
 variable "health_check_path" {
   description = "Path to check if the service is healthy, e.g. \"/status\""
+}
+
+variable "alerts_email" {
+  description = "Email to send Cloud Watch alerts to"
 }

@@ -55,3 +55,7 @@ variable "container_secrets" {
 variable "container_secrets_arns" {
   description = "ARN for secrets"
 }
+
+variable "alerts_email" {
+  description = "Email to send Cloud Watch alerts to"
+}

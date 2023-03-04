@@ -9,18 +9,18 @@ variable "environment" {
 }
 
 variable "region" {
-  description = "the AWS region e.g. \"eu-west-2\" Europe (London)"
-  default     = "eu-west-2"
+  description = "the AWS region e.g. \"us-east-2\" US East (Ohio)"
+  default     = "us-east-2"
 }
 
 variable "backend_bucket_name" {
   description = "the name of the backend bucket"
-  default     = "nab-aws-001-birthday-service-terraform-backend"
+  default     = "nab-aws-001-us-birthday-service-terraform-backend"
 }
 
 variable "backend_dynamodb_table_name" {
   description = "the name of the backend dynamo DB table"
-  default     = "birthday-service_terraform_state"
+  default     = "birthday-service_us_terraform_state"
 }
 
 variable "usernames" {
@@ -31,7 +31,7 @@ variable "usernames" {
 
 variable "availability_zones" {
   description = "a comma-separated list of availability zones, defaults to all AZ of the region, if set to something other than the defaults, both private_subnets and public_subnets have to be defined as well"
-  default     = ["eu-west-2a"] #["eu-west-2a", "eu-west-2b", "eu-west-2c"]
+  default     = ["us-east-2a", "us-east-2b"] #["us-east-2a", "us-east-2b", "us-east-2c"]
 }
 
 variable "cidr" {
@@ -83,6 +83,10 @@ variable "application-secrets" {
 #  description = "The ARN of the certificate that the ALB uses for https"
 #  default = "birthday_service_certificate_arn"
 #}
+
+variable "alerts_email" {
+  description = "Email to send Cloud Watch alerts to"
+}
 
 variable "db_username" {
   description = "RDS root username"

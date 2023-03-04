@@ -1,0 +1,9 @@
+# EXAMPLE terraform.tfvars with blank values
+application-secrets = {
+  "SPRING_DATASOURCE_URL"         = ""
+  "SPRING_DATASOURCE_USERNAME"    = ""
+  "SPRING_DATASOURCE_PASSWORD"    = ""
+  "SPRING_JPA_HIBERNATE_DDL_AUTO" = ""
+}
+db_password  = ""
+alerts_email = ""

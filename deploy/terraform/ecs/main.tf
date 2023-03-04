@@ -232,3 +232,127 @@ resource "aws_appautoscaling_policy" "ecs_policy_cpu" {
     scale_out_cooldown = 300
   }
 }
+
+resource "aws_cloudwatch_metric_alarm" "service_cpu_high" {
+  alarm_name          = "cb_cpu_utilization_high"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/ECS"
+  period              = "60"
+  statistic           = "Average"
+  threshold           = "85"
+
+  dimensions = {
+    ClusterName = aws_ecs_cluster.main.name
+    ServiceName = aws_ecs_service.main.name
+  }
+
+  # self-healing by "aws_appautoscaling_policy" "ecs_policy_cpu"
+
+  # action - SNS email
+  alarm_description = "ECS CPU Utilization Greater Than Threshold"
+  alarm_actions     = [aws_sns_topic.ecs_alarm.arn]
+}
+
+resource "aws_cloudwatch_metric_alarm" "service_cpu_low" {
+  alarm_name          = "cb_cpu_utilization_low"
+  comparison_operator = "LessThanOrEqualToThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/ECS"
+  period              = "60"
+  statistic           = "Average"
+  threshold           = "10"
+
+  dimensions = {
+    ClusterName = aws_ecs_cluster.main.name
+    ServiceName = aws_ecs_service.main.name
+  }
+
+  # self-healing by "aws_appautoscaling_policy" "ecs_policy_cpu"
+
+  # action - SNS email
+  alarm_description = "ECS CPU Utilization Less Than Threshold"
+  alarm_actions     = [aws_sns_topic.ecs_alarm.arn]
+}
+
+resource "aws_cloudwatch_metric_alarm" "memory_utilization_high" {
+  alarm_name          = "cb_memory_utilization_high"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = "1"
+  metric_name         = "MemoryUtilization"
+  namespace           = "AWS/ECS"
+  period              = "300"
+  statistic           = "Average"
+  threshold           = "80"
+
+  dimensions = {
+    ClusterName = aws_ecs_cluster.main.name
+    ServiceName = aws_ecs_service.main.name
+  }
+
+  # self-healing by "aws_appautoscaling_policy" "ecs_policy_memory"
+
+  # action - SNS email
+  alarm_description = "ECS Memory Utilization Greater Than Threshold"
+  alarm_actions     = [aws_sns_topic.ecs_alarm.arn]
+}
+
+resource "aws_cloudwatch_metric_alarm" "memory_utilization_low" {
+  alarm_name          = "cb_memory_utilization_low"
+  comparison_operator = "LessThanThreshold"
+  evaluation_periods  = "1"
+  metric_name         = "MemoryUtilization"
+  namespace           = "AWS/ECS"
+  period              = "300"
+  statistic           = "Average"
+  threshold           = "20"
+
+  dimensions = {
+    ClusterName = aws_ecs_cluster.main.name
+    ServiceName = aws_ecs_service.main.name
+  }
+
+  # self-healing by "aws_appautoscaling_policy" "ecs_policy_memory"
+
+  # action - SNS email
+  alarm_description = "ECS Memory Utilization Less Than Threshold"
+  alarm_actions     = [aws_sns_topic.ecs_alarm.arn]
+}
+
+# SNS topic to send emails with the Alerts
+resource "aws_sns_topic" "ecs_alarm" {
+  name              = "ecs-cloudwatch-alarm-topic"
+  kms_master_key_id = aws_kms_key.ecs_alarm_sns_encryption_key.id
+  delivery_policy   = <<EOF
+{
+  "http": {
+    "defaultHealthyRetryPolicy": {
+      "minDelayTarget": 20,
+      "maxDelayTarget": 20,
+      "numRetries": 3,
+      "numMaxDelayRetries": 0,
+      "numNoDelayRetries": 0,
+      "numMinDelayRetries": 0,
+      "backoffFunction": "linear"
+    },
+    "disableSubscriptionOverrides": false,
+    "defaultThrottlePolicy": {
+      "maxReceivesPerSecond": 1
+    }
+  }
+}
+EOF
+  ## This local exec, suscribes your email to the topic 
+  provisioner "local-exec" {
+    command = "aws sns subscribe --topic-arn ${self.arn} --protocol email --notification-endpoint ${var.alerts_email} --region ${var.region}"
+  }
+}
+
+## KMS Key to encrypt the SNS topic - security best practise
+resource "aws_kms_key" "ecs_alarm_sns_encryption_key" {
+  description             = "ECS alarms sns topic encryption key"
+  deletion_window_in_days = 30
+  enable_key_rotation     = true
+}
