@@ -14,7 +14,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=birthday-service-user
       - SPRING_DATASOURCE_PASSWORD=birthday-service-password
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-      - AUTH_SERVICE_URL=http://wiremock:8091/api/
+      - AUTH_SERVICE_URL=http://mocks:8091/api/
     ports:
       - 8080:8080
     networks:
