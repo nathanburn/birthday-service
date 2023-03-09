@@ -100,9 +100,15 @@ Steps:
     docker compose logs
     ```
 
-3. Navigate to `http://localhost:8080` in your browser.
+3. View test results:
 
-4. Tear down with Docker Compose:
+    ```bash
+    docker compose logs tests
+    ```
+
+4. Navigate to `http://localhost:8080` in your browser.
+
+5. Tear down with Docker Compose:
 
     ```bash
     docker compose down

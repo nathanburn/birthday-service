@@ -1,5 +1,7 @@
 version: '3.4'
 services:
+
+  # app - Spring REST Java 'birthday-service API'
   app:
     build:
       context: .
@@ -12,8 +14,13 @@ services:
       - SPRING_DATASOURCE_USERNAME=birthday-service-user
       - SPRING_DATASOURCE_PASSWORD=birthday-service-password
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - AUTH_SERVICE_URL=http://wiremock:8091/api/
     ports:
-      - 8080:8000
+      - 8080:8080
+    networks:
+      birthday-service-network: {}
+
+  # database - Spring JDBC PostgreSQL for 'birthday-service API'
   db:
     image: 'postgres:13.1-alpine'
     container_name: db
@@ -21,6 +28,40 @@ services:
       - POSTGRES_DB=birthday-service
       - POSTGRES_USER=birthday-service-user
       - POSTGRES_PASSWORD=birthday-service-password
+    networks:
+      birthday-service-network: {}
     # start the service with an initial example data set
     volumes:
       - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+
+  # wiremock - dependency services e.g. auth service and user service
+  wiremock:
+    image: wiremock/wiremock
+    container_name: mocks
+    command: --port 8091 --verbose --global-response-templating --async-response-enabled true
+    expose:
+      - 8091
+    volumes:
+      - ./wiremock:/home/wiremock
+    networks:
+      birthday-service-network: {}
+
+  # test suite (e.g. integration and performance)
+  tests:
+    image: blazemeter/taurus
+    container_name: tests
+    entrypoint: "bzt /performance/main.yaml /performance/config/localhost.yaml"
+    volumes:
+      - ./performance:/performance
+      - ./results:/results
+    networks:
+      birthday-service-network: {}
+    depends_on:
+      - app
+      - wiremock
+
+networks:
+  birthday-service-network:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1400

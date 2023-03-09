@@ -1,0 +1,7 @@
+settings:
+  env:
+    API_URL: 'http://app:8080'
+    STATUS_CONCURRENCY: 1
+    STATUS_ITERATIONS: 10
+    FAILURE_PERCENTAGE_THRESHOLD: '0%'
+    RESULTS_PATH: 'results'

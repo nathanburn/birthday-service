@@ -1,0 +1,40 @@
+execution:
+  - concurrency: ${STATUS_CONCURRENCY}
+    iterations: ${STATUS_ITERATIONS}
+    scenario: Happy Birthday Requests
+
+scenarios:
+  Happy Birthday Requests:
+    headers:
+      Content-Type: application/json
+    requests:
+      # /users
+      - label: 'GET-users'
+        method: GET
+        url: ${API_URL}/users
+        assert:
+          - subject: http-code
+            contains:
+              - 200
+      # /hello/{USERNAME}
+      - label: 'GET-hello'
+        method: GET
+        url: ${API_URL}/hello/bob
+        assert:
+          - subject: http-code
+            contains:
+              - 200
+
+settings:
+  artifacts-dir: ${RESULTS_PATH}/single-scenario-suite/artifacts
+
+reporting:
+  - module: final-stats
+    summary: true # overall samples count and percent of failures
+    dump-csv: ${RESULTS_PATH}/single-scenario-suite/report.csv
+    dump-xml: ${RESULTS_PATH}/single-scenario-suite/report.xml
+  - module: passfail # https://gettaurus.org/docs/PassFail/
+    criteria:
+      - subject: failures # failed responses percentage
+        condition: '>'
+        threshold: ${FAILURE_PERCENTAGE_THRESHOLD}

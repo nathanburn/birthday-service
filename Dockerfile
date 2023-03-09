@@ -5,5 +5,5 @@ RUN mvn -f /usr/src/app/pom.xml clean package
 
 FROM gcr.io/distroless/java17-debian11
 COPY --from=build /usr/src/app/target/birthday-service-*.jar /usr/app/birthday-service-*.jar
-EXPOSE 8000
+EXPOSE 8080
 ENTRYPOINT ["java","-jar","/usr/app/birthday-service-*.jar"]
